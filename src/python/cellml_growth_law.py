@@ -399,6 +399,9 @@ problem.SolverGet([iron.ControlLoopIdentifiers.NODE],1,odeIntegrationSolver)
 problem.SolverGet([iron.ControlLoopIdentifiers.NODE],2,nonlinearSolver)
 nonlinearSolver.outputType = iron.SolverOutputTypes.PROGRESS
 nonlinearSolver.NewtonJacobianCalculationTypeSet(iron.JacobianCalculationTypes.FD)
+nonlinearSolver.NewtonAbsoluteToleranceSet(1e-14)
+nonlinearSolver.NewtonSolutionToleranceSet(1e-14)
+nonlinearSolver.NewtonRelativeToleranceSet(1e-14)
 nonlinearSolver.NewtonCellMLSolverGet(cellMLEvaluationSolver)
 nonlinearSolver.NewtonLinearSolverGet(linearSolver)
 linearSolver.linearType = iron.LinearSolverTypes.DIRECT
