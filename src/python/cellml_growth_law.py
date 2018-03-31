@@ -409,7 +409,7 @@ cellMLEvaluationSolver = iron.Solver()
 problem.SolversCreateStart()
 problem.SolverGet([iron.ControlLoopIdentifiers.NODE],1,odeIntegrationSolver)
 problem.SolverGet([iron.ControlLoopIdentifiers.NODE],2,nonlinearSolver)
-nonlinearSolver.outputType = iron.SolverOutputTypes.PROGRESS
+nonlinearSolver.outputType = iron.SolverOutputTypes.MONITOR
 nonlinearSolver.NewtonJacobianCalculationTypeSet(iron.JacobianCalculationTypes.FD)
 nonlinearSolver.NewtonAbsoluteToleranceSet(1e-14)
 nonlinearSolver.NewtonSolutionToleranceSet(1e-14)
