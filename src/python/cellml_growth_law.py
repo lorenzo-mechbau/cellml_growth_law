@@ -53,10 +53,16 @@ height = 1.0
 width = 1.0
 length = 1.0
 
+fibreRate = 0.01
+sheetRate = 0.02
+normalRate = 0.03
+
+extension = 0.1
+
 NumberOfGaussXi = 2
 
 startTime = 0.0
-stopTime = 10.0
+stopTime = 1.0
 timeIncrement = 1.0
 
 coordinateSystemUserNumber = 1
@@ -270,9 +276,9 @@ equationsSet.DependentCreateFinish()
 growthCellML = iron.CellML()
 growthCellML.CreateStart(growthCellMLUserNumber,region)
 growthCellMLIdx = growthCellML.ModelImport("simplegrowth.cellml")
-#growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/fibrerate")
-#growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/sheetrate")
-#growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/normalrate")
+growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/fibrerate")
+growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/sheetrate")
+growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/normalrate")
 growthCellML.CreateFinish()
 
 # Create CellML <--> OpenCMISS field maps
@@ -292,10 +298,14 @@ growthCellMLModelsField.VariableLabelSet(iron.FieldVariableTypes.U,"GrowthModelM
 growthCellML.ModelsFieldCreateFinish()
 
 # Create the CELL parameters field
-#growthCellMLParametersField = iron.Field()
-#growthCellML.ParametersFieldCreateStart(growthCellMLParametersFieldUserNumber,growthCellMLParametersField)
-#growthCellMLParametersField.VariableLabelSet(iron.FieldVariableTypes.U,"GrowthParameters")
-#growthCellML.ParametersFieldCreateFinish()
+growthCellMLParametersField = iron.Field()
+growthCellML.ParametersFieldCreateStart(growthCellMLParametersFieldUserNumber,growthCellMLParametersField)
+growthCellMLParametersField.VariableLabelSet(iron.FieldVariableTypes.U,"GrowthParameters")
+growthCellML.ParametersFieldCreateFinish()
+#
+growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,1,fibreRate)
+growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,2,sheetRate)
+growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,3,normalRate)
 
 # Create the CELL state field
 growthCellMLStateField = iron.Field()
@@ -437,10 +447,10 @@ boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,3,1,iron
 boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,5,1,iron.BoundaryConditionsTypes.FIXED,0.0)
 boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,7,1,iron.BoundaryConditionsTypes.FIXED,0.0)
 
-boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,2,1,iron.BoundaryConditionsTypes.FIXED,0.1*width)
-boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,4,1,iron.BoundaryConditionsTypes.FIXED,0.1*width)
-boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,6,1,iron.BoundaryConditionsTypes.FIXED,0.1*width)
-boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,8,1,iron.BoundaryConditionsTypes.FIXED,0.1*width)
+boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,2,1,iron.BoundaryConditionsTypes.FIXED,extension*width)
+boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,4,1,iron.BoundaryConditionsTypes.FIXED,extension*width)
+boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,6,1,iron.BoundaryConditionsTypes.FIXED,extension*width)
+boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,8,1,iron.BoundaryConditionsTypes.FIXED,extension*width)
 
 # Set y=0 nodes to no y displacement
 boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,1,2,iron.BoundaryConditionsTypes.FIXED,0.0)
