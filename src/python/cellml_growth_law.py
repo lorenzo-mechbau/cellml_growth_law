@@ -59,7 +59,7 @@ normalRate = 0.03
 
 extension = 0.1
 
-NumberOfGaussXi = 2
+numberOfGaussXi = 2
 
 startTime = 0.0
 stopTime = 1.0
@@ -114,8 +114,8 @@ if InterpolationType in (1,2,3,4):
     basis.type = iron.BasisTypes.LAGRANGE_HERMITE_TP
 basis.numberOfXi = 3
 basis.interpolationXi = [iron.BasisInterpolationSpecifications.LINEAR_LAGRANGE]*3
-if(NumberOfGaussXi>0):
-    basis.quadratureNumberOfGaussXi = [NumberOfGaussXi]*3
+if(numberOfGaussXi>0):
+    basis.quadratureNumberOfGaussXi = [numberOfGaussXi]*3
 basis.CreateFinish()
 
 # Start the creation of a manually generated mesh in the region
