@@ -53,10 +53,16 @@ height = 1.0
 width = 1.0
 length = 1.0
 
-NumberOfGaussXi = 2
+fibreRate = 0.01
+sheetRate = 0.02
+normalRate = 0.03
+
+extension = 0.1
+
+numberOfGaussXi = 2
 
 startTime = 0.0
-stopTime = 10.0
+stopTime = 1.0
 timeIncrement = 1.0
 
 coordinateSystemUserNumber = 1
@@ -82,6 +88,8 @@ problemUserNumber = 1
 
 InterpolationType = 1
 
+iron.DiagnosticsSetOn(iron.DiagnosticTypes.FROM,[1,2,3,4,5],"Diagnostics",["FiniteElasticity_FiniteElementResidualEvaluate"])
+
 # Get the number of computational nodes and this computational node number
 numberOfComputationalNodes = iron.ComputationalNumberOfNodesGet()
 computationalNodeNumber = iron.ComputationalNodeNumberGet()
@@ -106,8 +114,8 @@ if InterpolationType in (1,2,3,4):
     basis.type = iron.BasisTypes.LAGRANGE_HERMITE_TP
 basis.numberOfXi = 3
 basis.interpolationXi = [iron.BasisInterpolationSpecifications.LINEAR_LAGRANGE]*3
-if(NumberOfGaussXi>0):
-    basis.quadratureNumberOfGaussXi = [NumberOfGaussXi]*3
+if(numberOfGaussXi>0):
+    basis.quadratureNumberOfGaussXi = [numberOfGaussXi]*3
 basis.CreateFinish()
 
 # Start the creation of a manually generated mesh in the region
@@ -268,9 +276,9 @@ equationsSet.DependentCreateFinish()
 growthCellML = iron.CellML()
 growthCellML.CreateStart(growthCellMLUserNumber,region)
 growthCellMLIdx = growthCellML.ModelImport("simplegrowth.cellml")
-#growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/fibrerate")
-#growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/sheetrate")
-#growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/normalrate")
+growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/fibrerate")
+growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/sheetrate")
+growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/normalrate")
 growthCellML.CreateFinish()
 
 # Create CellML <--> OpenCMISS field maps
@@ -290,10 +298,14 @@ growthCellMLModelsField.VariableLabelSet(iron.FieldVariableTypes.U,"GrowthModelM
 growthCellML.ModelsFieldCreateFinish()
 
 # Create the CELL parameters field
-#growthCellMLParametersField = iron.Field()
-#growthCellML.ParametersFieldCreateStart(growthCellMLParametersFieldUserNumber,growthCellMLParametersField)
-#growthCellMLParametersField.VariableLabelSet(iron.FieldVariableTypes.U,"GrowthParameters")
-#growthCellML.ParametersFieldCreateFinish()
+growthCellMLParametersField = iron.Field()
+growthCellML.ParametersFieldCreateStart(growthCellMLParametersFieldUserNumber,growthCellMLParametersField)
+growthCellMLParametersField.VariableLabelSet(iron.FieldVariableTypes.U,"GrowthParameters")
+growthCellML.ParametersFieldCreateFinish()
+#
+growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,1,fibreRate)
+growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,2,sheetRate)
+growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,3,normalRate)
 
 # Create the CELL state field
 growthCellMLStateField = iron.Field()
@@ -397,8 +409,11 @@ cellMLEvaluationSolver = iron.Solver()
 problem.SolversCreateStart()
 problem.SolverGet([iron.ControlLoopIdentifiers.NODE],1,odeIntegrationSolver)
 problem.SolverGet([iron.ControlLoopIdentifiers.NODE],2,nonlinearSolver)
-nonlinearSolver.outputType = iron.SolverOutputTypes.PROGRESS
+nonlinearSolver.outputType = iron.SolverOutputTypes.MONITOR
 nonlinearSolver.NewtonJacobianCalculationTypeSet(iron.JacobianCalculationTypes.FD)
+nonlinearSolver.NewtonAbsoluteToleranceSet(1e-14)
+nonlinearSolver.NewtonSolutionToleranceSet(1e-14)
+nonlinearSolver.NewtonRelativeToleranceSet(1e-14)
 nonlinearSolver.NewtonCellMLSolverGet(cellMLEvaluationSolver)
 nonlinearSolver.NewtonLinearSolverGet(linearSolver)
 linearSolver.linearType = iron.LinearSolverTypes.DIRECT
@@ -432,10 +447,10 @@ boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,3,1,iron
 boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,5,1,iron.BoundaryConditionsTypes.FIXED,0.0)
 boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,7,1,iron.BoundaryConditionsTypes.FIXED,0.0)
 
-boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,2,1,iron.BoundaryConditionsTypes.FIXED,0.1*width)
-boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,4,1,iron.BoundaryConditionsTypes.FIXED,0.1*width)
-boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,6,1,iron.BoundaryConditionsTypes.FIXED,0.1*width)
-boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,8,1,iron.BoundaryConditionsTypes.FIXED,0.1*width)
+boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,2,1,iron.BoundaryConditionsTypes.FIXED,extension*width)
+boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,4,1,iron.BoundaryConditionsTypes.FIXED,extension*width)
+boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,6,1,iron.BoundaryConditionsTypes.FIXED,extension*width)
+boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,8,1,iron.BoundaryConditionsTypes.FIXED,extension*width)
 
 # Set y=0 nodes to no y displacement
 boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,1,1,2,iron.BoundaryConditionsTypes.FIXED,0.0)
