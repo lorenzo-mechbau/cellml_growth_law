@@ -48,6 +48,12 @@ import sys, os
 # Intialise OpenCMISS
 from opencmiss.iron import iron
 
+# Path from command line argument or cd
+if len(sys.argv) > 1:
+    file_root_directory = sys.argv[1]
+else:
+    file_root_directory = os.path.dirname(__file__)
+
 # Set problem parameters
 height = 1.0
 width = 1.0
@@ -91,9 +97,11 @@ InterpolationType = 1
 iron.DiagnosticsSetOn(iron.DiagnosticTypes.FROM,[1,2,3,4,5],"Diagnostics",["FiniteElasticity_FiniteElementResidualEvaluate"])
 
 # Get the number of computational nodes and this computational node number
-computationEnvironment = iron.ComputationEnvironment()
-numberOfComputationalNodes = computationEnvironment.NumberOfWorldNodesGet()
-computationalNodeNumber = computationEnvironment.WorldNodeNumberGet()
+#computationEnvironment = iron.ComputationEnvironment()
+#numberOfComputationalNodes = computationEnvironment.NumberOfWorldNodesGet()
+#computationalNodeNumber = computationEnvironment.WorldNodeNumberGet()
+numberOfComputationalNodes = iron.ComputationalNumberOfNodesGet()
+computationalNodeNumber = iron.ComputationalNodeNumberGet()
 
 # Create a 3D rectangular cartesian coordinate system
 coordinateSystem = iron.CoordinateSystem()
@@ -276,7 +284,8 @@ equationsSet.DependentCreateFinish()
 # Create the CellML environment for the growth law
 growthCellML = iron.CellML()
 growthCellML.CreateStart(growthCellMLUserNumber,region)
-growthCellMLIdx = growthCellML.ModelImport("simplegrowth.cellml")
+growthCellML_fileName = os.path.join(file_root_directory, "simplegrowth.cellml")
+growthCellMLIdx = growthCellML.ModelImport(growthCellML_fileName)
 growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/fibrerate")
 growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/sheetrate")
 growthCellML.VariableSetAsKnown(growthCellMLIdx,"Main/normalrate")
@@ -317,7 +326,8 @@ growthCellML.StateFieldCreateFinish()
 # Create the CellML environment for the consitutative law
 constituativeCellML = iron.CellML()
 constituativeCellML.CreateStart(constituativeCellMLUserNumber,region)
-constituativeCellMLIdx = constituativeCellML.ModelImport("mooneyrivlin.cellml")
+constituativeCellMLIdx_fileName = os.path.join(file_root_directory, "mooneyrivlin.cellml")
+constituativeCellMLIdx = constituativeCellML.ModelImport(constituativeCellMLIdx_fileName)
 constituativeCellML.VariableSetAsKnown(constituativeCellMLIdx,"equations/E11")
 constituativeCellML.VariableSetAsKnown(constituativeCellMLIdx,"equations/E12")
 constituativeCellML.VariableSetAsKnown(constituativeCellMLIdx,"equations/E13")
@@ -479,4 +489,7 @@ fields.CreateRegion(region)
 fields.NodesExport("./results/CellMLGrowth","FORTRAN")
 fields.ElementsExport("./results/CellMLGrowth","FORTRAN")
 fields.Finalise()
+
+# Finalise OpenCMISS-Iron
+iron.Finalise()
 
